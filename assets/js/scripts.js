@@ -168,5 +168,4 @@ var incorrect = function() {
 
 containerEl.addEventListener("click", buttonHandler);
 
-
 buildWelcomeEl();
