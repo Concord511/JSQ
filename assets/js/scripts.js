@@ -1,6 +1,9 @@
 var containerEl = document.querySelector(".content-container");
 var highScoresEl = document.querySelector("#high-scores");
 var playerScore = 0;
+var timer = 300;
+var buttonOff = false;
+var nextQuestion = 0;
 var questions = [
     {
         qId: 0,
@@ -43,10 +46,14 @@ var questions = [
 // function that removes child elements from, and appends new child element (argument) to content-container
 var injectContent = function(htmlEl) {
     var oldChild = document.querySelector(".question-container");
+    var oldAnswer = document.querySelector(".answer");
     if (oldChild) {
         oldChild.remove();
     }
-
+    if (oldAnswer) {
+        oldAnswer.remove();
+    }
+    
     containerEl.appendChild(htmlEl);
 }
 
@@ -54,27 +61,41 @@ var injectContent = function(htmlEl) {
 var buttonHandler = function(event) {
     // set targetId equal to the buttons id attribute
     var targetId = event.target.getAttribute("id");
+    console.log("Target ID is: " + targetId);
 
-    // pull the second character from the button id representing to question ID
-    var qId = targetId[1];
-
-    if (targetId === null) {
-        return false;
-    }
-    else if (targetId === "start-button") {
+    // if the start button is clicked, build the first question
+    if (targetId === "start-button") {
         buildQuestionEl(questions[0]);
     }
-    else if (targetId[0] === "a") {
-        checkAnswer("a", questions[qId].qAnswer);
+    // if the next button is clicked, build the next question
+    else if (targetId === "next-button") {
+        buttonOff = false;
+        if (questions[nextQuestion]) {
+            buildQuestionEl(questions[nextQuestion]);
+        }
+        else {
+            buildHighScoresEl();
+        }
     }
-    else if (targetId[0] === "b") {
-        checkAnswer("b", questions[qId].qAnswer);
-    }
-    else if (targetId[0] === "c") {
-        checkAnswer("c", questions[qId].qAnswer);
-    }
-    else if (targetId[0] === "d") {
-        checkAnswer("d", questions[qId].qAnswer);
+    else {
+        // pull the second character from the button id representing to question ID
+        if (!buttonOff && targetId != null) {
+            var qId = targetId[1];
+            console.log("Question ID is: " + qId);
+
+            if (targetId[0] === "a") {
+                checkAnswer("a", questions[qId].qAnswer);
+            }
+            else if (targetId[0] === "b") {
+                checkAnswer("b", questions[qId].qAnswer);
+            }
+            else if (targetId[0] === "c") {
+                checkAnswer("c", questions[qId].qAnswer);
+            }
+            else if (targetId[0] === "d") {
+                checkAnswer("d", questions[qId].qAnswer);
+            }
+        }
     }
 }
 
@@ -143,7 +164,12 @@ var buildQuestionEl = function(questionObj) {
     divEl.appendChild(btnEl4);
 
     // call injectContent function and pass it the div element
+    nextQuestion++;
     injectContent(divEl);
+}
+
+var buildHighScoresEl = function() {
+    console.log("You finished!");
 }
 
 // function to check the answer clicked
@@ -158,12 +184,65 @@ var checkAnswer = function(playerAnswer, correctAnswer) {
 
 // function that creates an element with a top border, appends it to content-container, increments the score, and generates a button to move to the next question
 var correct = function() {
+    // disable answer buttons
+    buttonOff = true;
+    console.log("Toggled buttons off. " + buttonOff);
 
+    // increment player score
+    playerScore = playerScore + 10;
+
+    var correctEl = document.createElement("div");
+    correctEl.className = "answer"
+    
+    var correctTextEl = document.createElement("span");
+    correctTextEl.className = "correct";
+    correctTextEl.textContent = "Correct!"
+    
+    var nextButtonEl = document.createElement("button");
+    nextButtonEl.className = "question-button";
+    nextButtonEl.setAttribute("id", "next-button");
+    if (questions[nextQuestion]) {
+        nextButtonEl.textContent = "Next Question!";
+    }
+    else {
+        nextButtonEl.textContent = "Finish!";
+    }
+    
+
+    correctEl.appendChild(correctTextEl);
+    correctEl.appendChild(nextButtonEl);
+    containerEl.appendChild(correctEl);
 }
 
 // function that create an element with a top border, appends it to content-container, decrements the timer, and generates a button to move to the next question
 var incorrect = function() {
+    //decrement timer
+    timer = timer - 10;
+
+    // disable answer buttons
+    buttonOff = true;
+    console.log("Toggled buttons off. " + buttonOff);
+
+    var incorrectEl = document.createElement("div");
+    incorrectEl.className = "answer"
     
+    var incorrectTextEl = document.createElement("span");
+    incorrectTextEl.className = "incorrect";
+    incorrectTextEl.textContent = "Incorrect!"
+    
+    var nextButtonEl = document.createElement("button");
+    nextButtonEl.className = "question-button";
+    nextButtonEl.setAttribute("id", "next-button");
+    if (questions[nextQuestion]) {
+        nextButtonEl.textContent = "Next Question!";
+    }
+    else {
+        nextButtonEl.textContent = "Finish!";
+    }
+    
+    correctEl.appendChild(correctTextEl);
+    correctEl.appendChild(nextButtonEl);
+    containerEl.appendChild(correctEl);
 }
 
 containerEl.addEventListener("click", buttonHandler);
