@@ -1,7 +1,8 @@
 var containerEl = document.querySelector(".content-container");
 var highScoresEl = document.querySelector("#high-scores");
+var timerEl = document.querySelector("#time");
 var playerScore = 0;
-var timer = 300;
+var timeLeft = 300;
 var buttonOff = false;
 var nextQuestion = 0;
 var questions = [
@@ -175,15 +176,15 @@ var buildHighScoresEl = function() {
 // function to check the answer clicked
 var checkAnswer = function(playerAnswer, correctAnswer) {
     if (playerAnswer === correctAnswer) {
-        correct();
+        correct(correctAnswer);
     }
     else {
-        incorrect();
+        incorrect(correctAnswer);
     }
 }
 
 // function that creates an element with a top border, appends it to content-container, increments the score, and generates a button to move to the next question
-var correct = function() {
+var correct = function(correctAnswer) {
     // disable answer buttons
     buttonOff = true;
     console.log("Toggled buttons off. " + buttonOff);
@@ -208,16 +209,18 @@ var correct = function() {
         nextButtonEl.textContent = "Finish!";
     }
     
-
+    var correctButton = document.querySelector("." + correctAnswer + nextQuestion-1 + "");
+    correctButton.setAttribute("style", "question-button correct-question");
     correctEl.appendChild(correctTextEl);
     correctEl.appendChild(nextButtonEl);
     containerEl.appendChild(correctEl);
 }
 
 // function that create an element with a top border, appends it to content-container, decrements the timer, and generates a button to move to the next question
-var incorrect = function() {
+var incorrect = function(correctAnswer) {
     //decrement timer
-    timer = timer - 10;
+    timeLeft = timeLeft - 10;
+    timerEl.textContent = timeLeft;
 
     // disable answer buttons
     buttonOff = true;
@@ -240,9 +243,16 @@ var incorrect = function() {
         nextButtonEl.textContent = "Finish!";
     }
     
-    correctEl.appendChild(correctTextEl);
-    correctEl.appendChild(nextButtonEl);
-    containerEl.appendChild(correctEl);
+    // STUCK HERE
+    // var hunt = correctAnswer + (nextQuestion - 1);
+    // console.log("Tying to grab element by id: " + hunt);
+    // var correctButton = document.querySelector(hunt);
+    // console.log(correctButton);
+    // correctButton.setAttribute("style", "question-button correct-question");
+    
+    incorrectEl.appendChild(incorrectTextEl);
+    incorrectEl.appendChild(nextButtonEl);
+    containerEl.appendChild(incorrectEl);
 }
 
 containerEl.addEventListener("click", buttonHandler);
