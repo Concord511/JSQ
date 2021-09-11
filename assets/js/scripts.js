@@ -51,13 +51,17 @@ var questions = [
 
 // function that removes child elements from, and appends new child element (argument) to content-container
 var injectContent = function(htmlEl) {
-    var oldChild = document.querySelector(".question-container");
+    var oldQuestion = document.querySelector(".question-container");
+    var oldScores = document.querySelector(".highscores-container");
     var oldAnswer = document.querySelector(".answer");
-    if (oldChild) {
-        oldChild.remove();
+    if (oldQuestion) {
+        oldQuestion.remove();
     }
     if (oldAnswer) {
         oldAnswer.remove();
+    }
+    if (oldScores) {
+        oldScores.remove();
     }
     
     containerEl.appendChild(htmlEl);
@@ -223,48 +227,29 @@ var buildFinalScoreEl = function() {
 
 var buildHighScoresEl = function(displayEl) {
     var divEl = document.createElement("div");
+    var scoreH1El = document.createElement("h1");
+    divEl.className = "highscores-container";
+    scoreH1El.className = "question-title";
+    scoreH1El.textContent = "High Scores:"
     
-    if (displayEl) {
+    if (displayEl != null) {
         divEl.appendChild(displayEl);
     }
-    else {
-        for (var i = 0; i < highScores.length; i++) {
-            var scoreContainerEl = document.createElement("div");
-            var scoreEl = document.createElement("span");
-            var initialsEl = document.createElement("span");
-            scoreContainerEl.className = "score-container";
-            console.log(highScoreObj);
-            scoreEl.textContent = highScores[i].score;
-            initialsEl.textContent = highScores[i].initials;
-
-            scoreContainerEl.appendChild(scoreEl);
-            scoreContainerEl.appendChild(initialsEl);
-            divEl.appendChild(scoreContainerEl);
-        }
+    divEl.appendChild(scoreH1El);
+    for (var i = 0; i < highScores.length; i++) {
+        var scoreContainerEl = document.createElement("div");
+        var scoreEl = document.createElement("span");
+        var initialsEl = document.createElement("span");
+        scoreContainerEl.className = "score-container";
+        scoreEl.className = "score-text";
+        initialsEl.className = "score-text";
+        scoreEl.textContent = highScores[i].score;
+        initialsEl.textContent = highScores[i].initials;
+        scoreContainerEl.appendChild(scoreEl);
+        scoreContainerEl.appendChild(initialsEl);
+        divEl.appendChild(scoreContainerEl);
     }
     injectContent(divEl);
-}
-
-// function to build high scores page
-var addHighScore = function(newScore, playerInitials) {
-    highScoreObj.score = newScore;
-    highScoreObj.initials = playerInitials;
-    console.log(highScoreObj);
-    highScores.push(highScoreObj);
-    console.log(highScores);
-    buildHighScoresEl();
-}
-
-// function to check the answer clicked
-var checkAnswer = function(playerAnswer, correctAnswer) {
-    if (playerAnswer === correctAnswer) {
-        buildAnswerDisplay(playerAnswer, correctAnswer, true);
-        playerScore += 10;
-    }
-    else {
-        buildAnswerDisplay(playerAnswer, correctAnswer, false);
-        timeLeft -= 10;
-    }
 }
 
 var buildAnswerDisplay = function(playerAnswer, correctAnswer, playerCorrect) {
@@ -303,7 +288,58 @@ var buildAnswerDisplay = function(playerAnswer, correctAnswer, playerCorrect) {
     containerEl.appendChild(answerEl);
 }
 
+// function to build high scores page
+var addHighScore = function(newScore, playerInitials) {
+    highScoreObj.score = newScore;
+    highScoreObj.initials = playerInitials;
+    highScores.push(highScoreObj);
+    sortHighScores(highScores);
+    saveHighScore(highScores);
+    buildHighScoresEl();
+}
+
+// add the players high score to the highScores array of objects, sort the array, and store in localStorage
+var saveHighScore = function(highScoresArray) {
+    localStorage.setItem("highScores", JSON.stringify(highScoresArray));
+
+}
+
+// load the array of highScore objects from localStorage
+var loadHighScores = function() {
+    var tempScores = localStorage.getItem("highScores");
+    tempScores = JSON.parse(tempScores);
+    if (!tempScores) {
+        return [];
+    }
+    else {
+        return tempScores;
+    }
+}
+
+// sort 
+var sortHighScores = function(highScoresArray) {
+    var newArray = highScoresArray;
+    newArray.sort(function(a, b) {
+        return b.score - a.score;
+    })
+    highScores = newArray;
+}
+
+// function to check the answer clicked
+var checkAnswer = function(playerAnswer, correctAnswer) {
+    if (playerAnswer === correctAnswer) {
+        buildAnswerDisplay(playerAnswer, correctAnswer, true);
+        playerScore += 10;
+    }
+    else {
+        buildAnswerDisplay(playerAnswer, correctAnswer, false);
+        timeLeft -= 10;
+    }
+}
+
 containerEl.addEventListener("click", buttonHandler);
 containerEl.addEventListener("submit", finalScoreHandler);
 
+highScores = loadHighScores();
 buildWelcomeEl();
+console.log(highScores);

@@ -152,7 +152,9 @@ main {
 }
 
 .score-container {
+    margin: 10px 0;
     display: flex;
+    justify-content: space-between;
     margin: 20px;
     height: 30px;
     width: 80%;
@@ -162,4 +164,18 @@ main {
     color: white;
     font-size: 16px;
     box-shadow: -5px 5px 5px black;
+}
+
+.score-text {
+    padding: 0 20px;
+    text-align: center;
+    font-size: 24px;
+    color: white;
+    text-shadow: 0 1px 2px black;
+}
+
+.highscores-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
