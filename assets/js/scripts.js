@@ -5,6 +5,11 @@ var playerScore = 0;
 var timeLeft = 300;
 var buttonOff = false;
 var nextQuestion = 0;
+var highScores = [];
+var highScoreObj = {
+    score: 0,
+    initials: ""
+}
 var questions = [
     {
         qId: 0,
@@ -62,7 +67,6 @@ var injectContent = function(htmlEl) {
 var buttonHandler = function(event) {
     // set targetId equal to the buttons id attribute
     var targetId = event.target.getAttribute("id");
-    console.log("Target ID is: " + targetId);
 
     // if the start button is clicked, build the first question
     if (targetId === "start-button") {
@@ -75,14 +79,13 @@ var buttonHandler = function(event) {
             buildQuestionEl(questions[nextQuestion]);
         }
         else {
-            buildHighScoresEl();
+            buildFinalScoreEl();
         }
     }
     else {
         // pull the second character from the button id representing to question ID
         if (!buttonOff && targetId != null) {
             var qId = targetId[1];
-            console.log("Question ID is: " + qId);
 
             if (targetId[0] === "a") {
                 checkAnswer("a", questions[qId].qAnswer);
@@ -97,6 +100,20 @@ var buttonHandler = function(event) {
                 checkAnswer("d", questions[qId].qAnswer);
             }
         }
+    }
+}
+
+var finalScoreHandler = function(event) {
+    event.preventDefault();
+    var formEl = document.querySelector("form");
+    var inputEl = document.querySelector("input").value;
+    
+    if (inputEl) {
+        formEl.reset();
+        addHighScore(playerScore, inputEl);
+    }
+    else {
+        alert("Please enter your initials.");
     }
 }
 
@@ -169,37 +186,109 @@ var buildQuestionEl = function(questionObj) {
     injectContent(divEl);
 }
 
-var buildHighScoresEl = function() {
-    console.log("You finished!");
+var buildFinalScoreEl = function() {
+    var highScoresEl = document.createElement("div");
+    var h1El = document.createElement("h1");
+    var formEl = document.createElement("form");
+    var initialsLabelEl = document.createElement("label");
+    var initialsEl = document.createElement("input");
+    var inputContainerEl = document.createElement("div");
+    var submitButton = document.createElement("button");
+
+    highScoresEl.className = "question-container";
+    h1El.className = "question-title";
+    formEl.className = "form";
+    initialsLabelEl.className = "form-label"
+    initialsEl.className = "form-input";
+    submitButton.className = "question-button";
+    
+    initialsLabelEl.setAttribute("for", "initialsInput")
+    initialsEl.setAttribute("type", "text");
+    initialsEl.setAttribute("placeholder", "Initials");
+    initialsEl.setAttribute("name", "initialsInput");
+    initialsEl.setAttribute("maxlength", 3);
+
+    h1El.textContent = "Your score: " + playerScore;
+    initialsLabelEl.textContent = "Initials:";
+    inputContainerEl.appendChild(initialsLabelEl);
+    inputContainerEl.appendChild(initialsEl);
+    formEl.appendChild(inputContainerEl);
+    formEl.appendChild(submitButton);
+    highScoresEl.appendChild(h1El);
+    highScoresEl.appendChild(formEl);
+    submitButton.textContent = "Submit Score";
+
+    buildHighScoresEl(highScoresEl);
+}
+
+var buildHighScoresEl = function(displayEl) {
+    var divEl = document.createElement("div");
+    
+    if (displayEl) {
+        divEl.appendChild(displayEl);
+    }
+    else {
+        for (var i = 0; i < highScores.length; i++) {
+            var scoreContainerEl = document.createElement("div");
+            var scoreEl = document.createElement("span");
+            var initialsEl = document.createElement("span");
+            scoreContainerEl.className = "score-container";
+            console.log(highScoreObj);
+            scoreEl.textContent = highScores[i].score;
+            initialsEl.textContent = highScores[i].initials;
+
+            scoreContainerEl.appendChild(scoreEl);
+            scoreContainerEl.appendChild(initialsEl);
+            divEl.appendChild(scoreContainerEl);
+        }
+    }
+    injectContent(divEl);
+}
+
+// function to build high scores page
+var addHighScore = function(newScore, playerInitials) {
+    highScoreObj.score = newScore;
+    highScoreObj.initials = playerInitials;
+    console.log(highScoreObj);
+    highScores.push(highScoreObj);
+    console.log(highScores);
+    buildHighScoresEl();
 }
 
 // function to check the answer clicked
 var checkAnswer = function(playerAnswer, correctAnswer) {
     if (playerAnswer === correctAnswer) {
-        correct(correctAnswer);
+        buildAnswerDisplay(playerAnswer, correctAnswer, true);
+        playerScore += 10;
     }
     else {
-        incorrect(correctAnswer);
+        buildAnswerDisplay(playerAnswer, correctAnswer, false);
+        timeLeft -= 10;
     }
 }
 
-// function that creates an element with a top border, appends it to content-container, increments the score, and generates a button to move to the next question
-var correct = function(correctAnswer) {
-    // disable answer buttons
+var buildAnswerDisplay = function(playerAnswer, correctAnswer, playerCorrect) {
     buttonOff = true;
-    console.log("Toggled buttons off. " + buttonOff);
 
-    // increment player score
-    playerScore = playerScore + 10;
-
-    var correctEl = document.createElement("div");
-    correctEl.className = "answer"
-    
-    var correctTextEl = document.createElement("span");
-    correctTextEl.className = "correct";
-    correctTextEl.textContent = "Correct!"
-    
+    var answerEl = document.createElement("div");
+    var answerTextEl = document.createElement("span");
     var nextButtonEl = document.createElement("button");
+    var answerButton = document.querySelector("#" + correctAnswer + (nextQuestion - 1));
+    var playerAnswerButton = document.querySelector("#" + playerAnswer + (nextQuestion - 1));
+    answerEl.className = "answer";
+
+    if (playerCorrect === true) {
+        answerTextEl.className = "correct";
+        answerTextEl.textContent = "Correct!";
+        answerButton.className = "question-button correct-answer";
+    }
+    else if (playerCorrect === false) {
+        answerTextEl.className = "incorrect";
+        answerTextEl.textContent = "Incorrect!";
+        answerButton.className = "question-button correct-answer";
+        playerAnswerButton.className = "question-button incorrect-answer";
+    }
+
     nextButtonEl.className = "question-button";
     nextButtonEl.setAttribute("id", "next-button");
     if (questions[nextQuestion]) {
@@ -208,53 +297,13 @@ var correct = function(correctAnswer) {
     else {
         nextButtonEl.textContent = "Finish!";
     }
-    
-    var correctButton = document.querySelector("." + correctAnswer + nextQuestion-1 + "");
-    correctButton.setAttribute("style", "question-button correct-question");
-    correctEl.appendChild(correctTextEl);
-    correctEl.appendChild(nextButtonEl);
-    containerEl.appendChild(correctEl);
-}
 
-// function that create an element with a top border, appends it to content-container, decrements the timer, and generates a button to move to the next question
-var incorrect = function(correctAnswer) {
-    //decrement timer
-    timeLeft = timeLeft - 10;
-    timerEl.textContent = timeLeft;
-
-    // disable answer buttons
-    buttonOff = true;
-    console.log("Toggled buttons off. " + buttonOff);
-
-    var incorrectEl = document.createElement("div");
-    incorrectEl.className = "answer"
-    
-    var incorrectTextEl = document.createElement("span");
-    incorrectTextEl.className = "incorrect";
-    incorrectTextEl.textContent = "Incorrect!"
-    
-    var nextButtonEl = document.createElement("button");
-    nextButtonEl.className = "question-button";
-    nextButtonEl.setAttribute("id", "next-button");
-    if (questions[nextQuestion]) {
-        nextButtonEl.textContent = "Next Question!";
-    }
-    else {
-        nextButtonEl.textContent = "Finish!";
-    }
-    
-    // STUCK HERE
-    // var hunt = correctAnswer + (nextQuestion - 1);
-    // console.log("Tying to grab element by id: " + hunt);
-    // var correctButton = document.querySelector(hunt);
-    // console.log(correctButton);
-    // correctButton.setAttribute("style", "question-button correct-question");
-    
-    incorrectEl.appendChild(incorrectTextEl);
-    incorrectEl.appendChild(nextButtonEl);
-    containerEl.appendChild(incorrectEl);
+    answerEl.appendChild(answerTextEl);
+    answerEl.appendChild(nextButtonEl);
+    containerEl.appendChild(answerEl);
 }
 
 containerEl.addEventListener("click", buttonHandler);
+containerEl.addEventListener("submit", finalScoreHandler);
 
 buildWelcomeEl();
