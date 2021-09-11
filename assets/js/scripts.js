@@ -1,15 +1,14 @@
+var bodyEl = document.querySelector(".body");
 var containerEl = document.querySelector(".content-container");
 var highScoresEl = document.querySelector("#high-scores");
 var timerEl = document.querySelector("#time");
 var playerScore = 0;
 var timeLeft = 300;
 var buttonOff = false;
+var playing = false;
 var nextQuestion = 0;
+var currentQuestion = 0;
 var highScores = [];
-var highScoreObj = {
-    score: 0,
-    initials: ""
-}
 var questions = [
     {
         qId: 0,
@@ -74,6 +73,7 @@ var buttonHandler = function(event) {
 
     // if the start button is clicked, build the first question
     if (targetId === "start-button") {
+        playing = true;
         buildQuestionEl(questions[0]);
     }
     // if the next button is clicked, build the next question
@@ -83,8 +83,29 @@ var buttonHandler = function(event) {
             buildQuestionEl(questions[nextQuestion]);
         }
         else {
+            playing = false;
             buildFinalScoreEl();
         }
+    }
+    else if (targetId === "high-scores") {
+        buildHighScoresEl();
+    }
+    else if (targetId === "go-back") {
+        if (playing) {
+            buildQuestionEl(questions[currentQuestion]);
+        }
+        else {
+            playerScore = 0;
+            timeLeft = 300;
+            nextQuestion = 0;
+            currentQuestion = 0;
+            buildWelcomeEl();
+        }
+    }
+    else if (targetId === "clear-scores") {
+        highScores = [];
+        localStorage.removeItem("highScores");
+        buildHighScoresEl();
     }
     else {
         // pull the second character from the button id representing to question ID
@@ -149,6 +170,8 @@ var buildWelcomeEl = function() {
 
 // function that builds questions from passed question object
 var buildQuestionEl = function(questionObj) {
+    buttonOff = false;
+
     // create elements
     var divEl = document.createElement("div");
     var h1El = document.createElement("h1");
@@ -186,7 +209,6 @@ var buildQuestionEl = function(questionObj) {
     divEl.appendChild(btnEl4);
 
     // call injectContent function and pass it the div element
-    nextQuestion++;
     injectContent(divEl);
 }
 
@@ -228,15 +250,31 @@ var buildFinalScoreEl = function() {
 var buildHighScoresEl = function(displayEl) {
     var divEl = document.createElement("div");
     var scoreH1El = document.createElement("h1");
+    var buttonContainerEl = document.createElement("div");
+    var goBackEl = document.createElement("button");
+    var clearScoresEl = document.createElement("button");
+
     divEl.className = "highscores-container";
     scoreH1El.className = "question-title";
+    goBackEl.className = "question-button";
+    clearScoresEl.className = "question-button";
+    buttonContainerEl.className = "final-buttons";
+
+    goBackEl.setAttribute("id", "go-back");
+    clearScoresEl.setAttribute("id", "clear-scores");
+
     scoreH1El.textContent = "High Scores:"
-    
+    goBackEl.textContent = "Go back";
+    clearScoresEl.textContent = "Clear High Scores";
+
     if (displayEl != null) {
         divEl.appendChild(displayEl);
     }
     divEl.appendChild(scoreH1El);
+    sortHighScores(highScores);
+    console.log("Length is: " + highScores.length);
     for (var i = 0; i < highScores.length; i++) {
+        console.log(highScores[i]);
         var scoreContainerEl = document.createElement("div");
         var scoreEl = document.createElement("span");
         var initialsEl = document.createElement("span");
@@ -249,6 +287,9 @@ var buildHighScoresEl = function(displayEl) {
         scoreContainerEl.appendChild(initialsEl);
         divEl.appendChild(scoreContainerEl);
     }
+    buttonContainerEl.appendChild(goBackEl);
+    buttonContainerEl.appendChild(clearScoresEl);
+    divEl.appendChild(buttonContainerEl);
     injectContent(divEl);
 }
 
@@ -258,8 +299,8 @@ var buildAnswerDisplay = function(playerAnswer, correctAnswer, playerCorrect) {
     var answerEl = document.createElement("div");
     var answerTextEl = document.createElement("span");
     var nextButtonEl = document.createElement("button");
-    var answerButton = document.querySelector("#" + correctAnswer + (nextQuestion - 1));
-    var playerAnswerButton = document.querySelector("#" + playerAnswer + (nextQuestion - 1));
+    var answerButton = document.querySelector("#" + correctAnswer + currentQuestion);
+    var playerAnswerButton = document.querySelector("#" + playerAnswer + currentQuestion);
     answerEl.className = "answer";
 
     if (playerCorrect === true) {
@@ -286,32 +327,36 @@ var buildAnswerDisplay = function(playerAnswer, correctAnswer, playerCorrect) {
     answerEl.appendChild(answerTextEl);
     answerEl.appendChild(nextButtonEl);
     containerEl.appendChild(answerEl);
+    currentQuestion++;
+    nextQuestion++;
 }
 
 // function to build high scores page
 var addHighScore = function(newScore, playerInitials) {
+    var highScoreObj = {};
     highScoreObj.score = newScore;
     highScoreObj.initials = playerInitials;
     highScores.push(highScoreObj);
     sortHighScores(highScores);
     saveHighScore(highScores);
     buildHighScoresEl();
+    console.log("after building the high scores page from the addHighScore function: ");
+    console.log(highScores);
 }
 
 // add the players high score to the highScores array of objects, sort the array, and store in localStorage
 var saveHighScore = function(highScoresArray) {
     localStorage.setItem("highScores", JSON.stringify(highScoresArray));
-
 }
 
 // load the array of highScore objects from localStorage
 var loadHighScores = function() {
     var tempScores = localStorage.getItem("highScores");
-    tempScores = JSON.parse(tempScores);
-    if (!tempScores) {
+    if (tempScores === undefined || tempScores === null) {
         return [];
     }
     else {
+        tempScores = JSON.parse(tempScores);
         return tempScores;
     }
 }
@@ -337,9 +382,8 @@ var checkAnswer = function(playerAnswer, correctAnswer) {
     }
 }
 
-containerEl.addEventListener("click", buttonHandler);
+bodyEl.addEventListener("click", buttonHandler);
 containerEl.addEventListener("submit", finalScoreHandler);
 
 highScores = loadHighScores();
 buildWelcomeEl();
-console.log(highScores);
