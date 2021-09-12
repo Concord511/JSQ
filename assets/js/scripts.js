@@ -92,7 +92,13 @@ var buttonHandler = function(event) {
     }
     else if (targetId === "go-back") {
         if (playing) {
-            buildQuestionEl(questions[currentQuestion]);
+            if (questions[currentQuestion]) {
+                buildQuestionEl(questions[currentQuestion]);
+            }
+            else {
+                playing = false;
+                buildFinalScoreEl()
+            }
         }
         else {
             playerScore = 0;
