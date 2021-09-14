@@ -3,7 +3,7 @@ var containerEl = document.querySelector(".content-container");
 var highScoresEl = document.querySelector("#high-scores");
 var timerEl = document.querySelector("#time");
 var playerScore = 0;
-var timeLeft = 30;
+var timeLeft = 60;
 var buttonOff = false;
 var playing = false;
 var timerInterval = null;
@@ -13,40 +13,85 @@ var highScores = [];
 var questions = [
     {
         qId: 0,
-        qText: "I am question #1",
-        qOption1: "Correct Answer 1",
-        qOption2: "Answer 2",
-        qOption3: "Answer 3",
-        qOption4: "Answer 4",
+        qText: "How do you declare a variable in JavaScript?",
+        qOption1: "var x = 0;",
+        qOption2: "integer x = 0;",
+        qOption3: "var x.",
+        qOption4: "variable int x",
         qAnswer: "a"
     },
     {
         qId: 1,
-        qText: "I am question #2",
-        qOption1: "Answer 1",
-        qOption2: "Correct Answer 2",
-        qOption3: "Answer 3",
-        qOption4: "Answer 4",
+        qText: 'Which of the following will not declare a new variable, isString, to equal "I am totally a string."',
+        qOption1: 'var isString = "I am totally a string."',
+        qOption2: 'var isString = "I ", "am ", "totally ", "a ", "string."',
+        qOption3: 'var isString = "I " + "am " + "totally " + "a " + "string."',
+        qOption4: 'var isString = "I am tota" + "lly a string."',
         qAnswer: "b"
     },
     {
         qId: 2,
-        qText: "I am question #3",
-        qOption1: "Answer 1",
-        qOption2: "Answer 2",
-        qOption3: "Correct Answer 3",
-        qOption4: "Answer 4",
+        qText: "A variable created inside of a function is considered to have _______ scope.",
+        qOption1: "global",
+        qOption2: "indifferent",
+        qOption3: "local",
+        qOption4: "super",
         qAnswer: "c"
     },
     {
         qId: 3,
-        qText: "I am question #4",
-        qOption1: "Answer 1",
-        qOption2: "Answer 2",
-        qOption3: "Answer 3",
-        qOption4: "Correct Answer 4",
+        qText: "A function that calls itself is commonly referred to as a _______ function",
+        qOption1: "mimic",
+        qOption2: "self-reliant",
+        qOption3: "automatic",
+        qOption4: "recursive",
         qAnswer: "d"
-    }
+    },
+    {
+        qId: 4,
+        qText: "When declaring a variable, do you need to initialize it with a value?",
+        qOption1: "Yes",
+        qOption2: "Yes, but only when assigning an integer.",
+        qOption3: "No",
+        qOption4: "No, unless assigning a boolean.",
+        qAnswer: "c"
+    },
+    {
+        qId: 5,
+        qText: "Which operand is used to assign a value to a variable?",
+        qOption1: "=",
+        qOption2: "--",
+        qOption3: "===",
+        qOption4: "++",
+        qAnswer: "a"
+    },
+    {
+        qId: 6,
+        qText: "Which of these represents a boolean value?",
+        qOption1: "undefined",
+        qOption2: "null",
+        qOption3: "0",
+        qOption4: "true",
+        qAnswer: "d"
+    },
+    {
+        qId: 7,
+        qText: "What will the following code log?\nvar i = 0;\ni++;\ni = i + 13;\ni = i / 2;\nconsole.log(i);",
+        qOption1: "6.5",
+        qOption2: "0",
+        qOption3: "undefined",
+        qOption4: "7",
+        qAnswer: "d"
+    },
+    {
+        qId: 8,
+        qText: "If a variable is initialized without a value, what will console logging the variable return?",
+        qOption1: "null",
+        qOption2: "true",
+        qOption3: "undefined",
+        qOption4: "false",
+        qAnswer: "c"
+    },
 ];
 
 // function that removes child elements from, and appends new child element (argument) to content-container
@@ -104,7 +149,7 @@ var buttonHandler = function(event) {
         }
         else {
             playerScore = 0;
-            timeLeft = 30;
+            timeLeft = 60;
             document.querySelector("#time").textContent = timeLeft;
             nextQuestion = 0;
             currentQuestion = 0;
