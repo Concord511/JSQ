@@ -3,9 +3,10 @@ var containerEl = document.querySelector(".content-container");
 var highScoresEl = document.querySelector("#high-scores");
 var timerEl = document.querySelector("#time");
 var playerScore = 0;
-var timeLeft = 300;
+var timeLeft = 30;
 var buttonOff = false;
 var playing = false;
+var timerInterval = null;
 var nextQuestion = 0;
 var currentQuestion = 0;
 var highScores = [];
@@ -74,6 +75,7 @@ var buttonHandler = function(event) {
     // if the start button is clicked, build the first question
     if (targetId === "start-button") {
         playing = true;
+        startTimer();
         buildQuestionEl(questions[0]);
     }
     // if the next button is clicked, build the next question
@@ -102,7 +104,8 @@ var buttonHandler = function(event) {
         }
         else {
             playerScore = 0;
-            timeLeft = 300;
+            timeLeft = 30;
+            document.querySelector("#time").textContent = timeLeft;
             nextQuestion = 0;
             currentQuestion = 0;
             buildWelcomeEl();
@@ -134,6 +137,7 @@ var buttonHandler = function(event) {
     }
 }
 
+// form input handler for entering score
 var finalScoreHandler = function(event) {
     event.preventDefault();
     var formEl = document.querySelector("form");
@@ -146,6 +150,27 @@ var finalScoreHandler = function(event) {
     else {
         alert("Please enter your initials.");
     }
+}
+
+// start timer
+var startTimer = function() {
+    timerInterval = setInterval(function() {
+        var timeEl = document.querySelector("#time");
+        if (timeLeft <= 0 && playing === true) {
+            clearInterval(timerInterval);
+            playing = false;
+            buildFinalScoreEl(true);
+        }
+        else {
+            timeLeft--;
+            timeEl.textContent = timeLeft;
+        }
+    }, 1000);
+}
+
+// stop timer function
+var stopTimer = function() {
+    clearInterval(timerInterval);
 }
 
 // function that builds the welcome screen
@@ -218,7 +243,10 @@ var buildQuestionEl = function(questionObj) {
     injectContent(divEl);
 }
 
-var buildFinalScoreEl = function() {
+var buildFinalScoreEl = function(outOfTime) {
+    playing = false;
+    stopTimer();
+
     var highScoresEl = document.createElement("div");
     var h1El = document.createElement("h1");
     var formEl = document.createElement("form");
@@ -240,7 +268,12 @@ var buildFinalScoreEl = function() {
     initialsEl.setAttribute("name", "initialsInput");
     initialsEl.setAttribute("maxlength", 3);
 
-    h1El.textContent = "Your score: " + playerScore;
+    if (outOfTime) {
+        h1El.textContent = "You ran out of time! Your score: " + playerScore;
+    }
+    else {
+        h1El.textContent = "Your score: " + playerScore;
+    }
     initialsLabelEl.textContent = "Initials:";
     inputContainerEl.appendChild(initialsLabelEl);
     inputContainerEl.appendChild(initialsEl);
