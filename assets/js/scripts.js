@@ -203,6 +203,7 @@ var startTimer = function() {
         var timeEl = document.querySelector("#time");
         if (timeLeft <= 0 && playing === true) {
             clearInterval(timerInterval);
+            timeEl.textContent = 0;
             playing = false;
             buildFinalScoreEl(true);
         }
@@ -288,6 +289,7 @@ var buildQuestionEl = function(questionObj) {
     injectContent(divEl);
 }
 
+// build the final score DOM elements and pass them to the buildHighScore function as an argument
 var buildFinalScoreEl = function(outOfTime) {
     playing = false;
     stopTimer();
@@ -331,6 +333,7 @@ var buildFinalScoreEl = function(outOfTime) {
     buildHighScoresEl(highScoresEl);
 }
 
+// build the high score DOM elements and append pass them to the injectContent function as an argument
 var buildHighScoresEl = function(displayEl) {
     var divEl = document.createElement("div");
     var scoreH1El = document.createElement("h1");
@@ -356,9 +359,7 @@ var buildHighScoresEl = function(displayEl) {
     }
     divEl.appendChild(scoreH1El);
     sortHighScores(highScores);
-    console.log("Length is: " + highScores.length);
     for (var i = 0; i < highScores.length; i++) {
-        console.log(highScores[i]);
         var scoreContainerEl = document.createElement("div");
         var scoreEl = document.createElement("span");
         var initialsEl = document.createElement("span");
@@ -377,6 +378,7 @@ var buildHighScoresEl = function(displayEl) {
     injectContent(divEl);
 }
 
+// build and change DOM elements to display the player's answer and the correct answer
 var buildAnswerDisplay = function(playerAnswer, correctAnswer, playerCorrect) {
     buttonOff = true;
 
@@ -424,8 +426,6 @@ var addHighScore = function(newScore, playerInitials) {
     sortHighScores(highScores);
     saveHighScore(highScores);
     buildHighScoresEl();
-    console.log("after building the high scores page from the addHighScore function: ");
-    console.log(highScores);
 }
 
 // add the players high score to the highScores array of objects, sort the array, and store in localStorage
@@ -445,7 +445,7 @@ var loadHighScores = function() {
     }
 }
 
-// sort 
+// sort array of high scores
 var sortHighScores = function(highScoresArray) {
     var newArray = highScoresArray;
     newArray.sort(function(a, b) {
